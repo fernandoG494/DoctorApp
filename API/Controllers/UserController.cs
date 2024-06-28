@@ -1,4 +1,5 @@
 ﻿using Data;
+using Data.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Dtos;
@@ -11,10 +12,12 @@ namespace API.Controllers
     public class UserController : BaseApiController
     {
         private readonly ApplicationDBContext _db;
+        private readonly ITokenService _tokenService;
 
-        public UserController(ApplicationDBContext db)
+        public UserController(ApplicationDBContext db, ITokenService tokenService)
         {
             _db = db;
+            _tokenService = tokenService;
         }
 
         [HttpGet]
@@ -32,7 +35,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<Usuario>> Register(RegisterDto registerDto)
+        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
             if (await UserExist(registerDto.Username)) {
                 return BadRequest("User already registered");
@@ -47,21 +50,29 @@ namespace API.Controllers
             };
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
-            return user;
+            return new UserDto
+            {
+                Username = user.UserName,
+                Token = _tokenService.CreateToken(user)
+            };
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<Usuario>> Login(LoginDto loginDto)
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
-            var usuario = await _db.Users.SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
-            if (usuario == null) return Unauthorized("User or password not valid");
-            using var hmac = new HMACSHA512(usuario.PasswordSalt);
+            var user = await _db.Users.SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
+            if (user == null) return Unauthorized("User or password not valid");
+            using var hmac = new HMACSHA512(user.PasswordSalt);
             var computedhash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
             for (int i = 0; i < computedhash.Length; i++)
             {
-                if (computedhash[i] != usuario.PasswordHash[i]) return Unauthorized("User or password not valid");
+                if (computedhash[i] != user.PasswordHash[i]) return Unauthorized("User or password not valid");
             }
-            return usuario;
+            return new UserDto
+            {
+                Username = user.UserName,
+                Token = _tokenService.CreateToken(user)
+            };
         }
 
         private async Task<bool> UserExist(string username)
