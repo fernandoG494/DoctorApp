@@ -31,7 +31,7 @@ namespace API.Controllers
             return Ok(usuario);
         }
 
-        [HttpPost("registro")]
+        [HttpPost("register")]
         public async Task<ActionResult<Usuario>> Register(RegisterDto registerDto)
         {
             if (await UserExist(registerDto.Username)) {
@@ -48,6 +48,20 @@ namespace API.Controllers
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
             return user;
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<Usuario>> Login(LoginDto loginDto)
+        {
+            var usuario = await _db.Users.SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
+            if (usuario == null) return Unauthorized("User or password not valid");
+            using var hmac = new HMACSHA512(usuario.PasswordSalt);
+            var computedhash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
+            for (int i = 0; i < computedhash.Length; i++)
+            {
+                if (computedhash[i] != usuario.PasswordHash[i]) return Unauthorized("User or password not valid");
+            }
+            return usuario;
         }
 
         private async Task<bool> UserExist(string username)

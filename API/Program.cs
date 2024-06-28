@@ -1,4 +1,6 @@
 using Data;
+using Data.Interfaces;
+using Data.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,9 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddCors();
+
+// Added services
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 

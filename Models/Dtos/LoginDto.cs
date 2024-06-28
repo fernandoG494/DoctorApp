@@ -2,7 +2,7 @@
 
 namespace Models.Dtos
 {
-    public class RegisterDto
+    public class LoginDto
     {
         [Required(ErrorMessage = "Username is required")]
         public string Username { get; set; }
