@@ -1,5 +1,6 @@
 ﻿using Data;
 using Data.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Dtos;
@@ -20,6 +21,7 @@ namespace API.Controllers
             _tokenService = tokenService;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
         {
@@ -27,6 +29,7 @@ namespace API.Controllers
             return Ok(usuarios);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<Usuario>> GetUsuario(int id)
         {
