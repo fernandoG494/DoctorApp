@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using API.Errors;
+using Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
@@ -25,7 +26,8 @@ namespace API.Controllers
         public ActionResult<Usuario> GetNotFound()
         {
             var userObject = _db.Users.Find(-1);
-            if (userObject == null) return NotFound();
+            if (userObject == null)
+                return NotFound(new ApiErrorsResponse(404));
             return userObject;
         }
 
@@ -40,7 +42,7 @@ namespace API.Controllers
         [HttpGet("bad-request")]
         public ActionResult<string> GetBadRequest()
         {
-            return BadRequest("Request are not valid");
+            return BadRequest(new ApiErrorsResponse(400));
         }
     }
 }

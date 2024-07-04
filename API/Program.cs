@@ -1,4 +1,5 @@
 using API.Extensiones;
+using API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,8 @@ builder.Services.AddApplicationService(builder.Configuration);
 builder.Services.AddIdentityService(builder.Configuration);
 
 var app = builder.Build();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
 if (app.Environment.IsDevelopment())
 {

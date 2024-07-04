@@ -1,10 +1,10 @@
-﻿using System.Text;
-using Data.Interfaces;
-using Models.Entities;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Data.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Models.Entities;
 
 namespace Data.Services
 {
@@ -15,7 +15,6 @@ namespace Data.Services
         public TokenService(IConfiguration config)
         {
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
-
         }
 
         public string CreateToken(Usuario usuario)
